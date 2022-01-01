@@ -42,10 +42,13 @@ async def getInvites():
       invites = tmp 
     await asyncio.sleep(0.1)
 
+
+
 @client.event
 async def on_ready():
   print("\nManageInvites Ready\n")
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="your invites"))
+
 
 @client.event
 async def on_member_join(member):
@@ -54,9 +57,34 @@ async def on_member_join(member):
   global invite
   print(invite.inviter.name)
 
+
+@client.event
+async def on_message(message):
+  #check for bots
+  if message.author.bot:
+    return
+
+  #get prefix
+  prefix = db[str(message.guild.id)]["prefix"]
+
+  DUMP = True
+  if DUMP:
+    data2 = {}
+    count = 0
+    for key in db.keys():
+      data2[str(key)] = db[str(key)]
+      count += 1
+
+    with open("database.json", 'w') as f:
+      json.dump(str(data2), f)
+
+  messagecontent = message.content.lower()
+
 @client.event
 async def on_guild_join(guild):
-  pass
+  db[str(guild.id)] = {"prefix": "i/"}
+
+
 
 client.loop.create_task(getInvites())
 
