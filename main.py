@@ -40,7 +40,7 @@ async def getInvites():
               break
         tmp.append(tuple((i.code, i.uses)))
       invites = tmp 
-    await asyncio.sleep(0.1)
+    await asyncio.sleep(0.5)
 
 
 
@@ -53,7 +53,7 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
   #wait until getInvites() is done
-  await asyncio.sleep(0.12)
+  await asyncio.sleep(0.6)
   global invite
   print(invite.inviter.name)
 
