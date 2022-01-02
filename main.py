@@ -49,7 +49,6 @@ async def on_ready():
   print("\nManageInvites Ready\n")
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="your invites"))
 
-#db = []
 
 @client.event
 async def on_member_join(member):
