@@ -40,7 +40,7 @@ async def getInvites():
               break
         tmp.append(tuple((i.code, i.uses)))
       invites = tmp 
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(1)
 
 
 
@@ -49,13 +49,39 @@ async def on_ready():
   print("\nManageInvites Ready\n")
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="your invites"))
 
+#db = []
 
 @client.event
 async def on_member_join(member):
   #wait until getInvites() is done
-  await asyncio.sleep(0.6)
+  await asyncio.sleep(1.1)
   global invite
+
   print(invite.inviter.name)
+  #add new member into database
+  if str(member.id) not in db[str(member.guild.id)]:
+    db[str(member.guild.id)][str(member.id)] = [str(invite.code),invite.inviter.id,0,0]
+  #add invite to inviter
+  if str(invite.inviter.id) not in db[str(member.guild.id)]:
+    db[str(member.guild.id)][str(invite.inviter.id)] = ["",0,0,0]
+  db[str(member.guild.id)][str(invite.inviter.id)][2] += 1
+
+
+@client.event
+async def on_member_remove(member):
+  #add to leaves
+  #chcek if left member is in db
+  print(1)
+  if str(member.id) in db[str(member.guild.id)]:
+    print(2)
+    #ensure there was inviter
+    if db[str(member.guild.id)][str(member.id)][0] != "":
+      print(3)
+      #check if inviter is in server
+      if str(db[str(member.guild.id)][str(member.id)][1]) in db[str(member.guild.id)]:
+        print(4)
+        #add to inviter leaves
+        db[str(member.guild.id)][str(db[str(member.guild.id)][str(member.id)][1])][3] += 1
 
 
 @client.event
@@ -63,6 +89,11 @@ async def on_message(message):
   #check for bots
   if message.author.bot:
     return
+
+  messagecontent = message.content.lower()
+
+  if messagecontent == "i/clear":
+    db[str(message.guild.id)] = {"prefix": "i/"}
 
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
@@ -78,7 +109,6 @@ async def on_message(message):
     with open("database.json", 'w') as f:
       json.dump(str(data2), f)
 
-  messagecontent = message.content.lower()
 
 @client.event
 async def on_guild_join(guild):
