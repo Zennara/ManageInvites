@@ -106,7 +106,7 @@ async def on_message(message):
     with open("database.json", 'w') as f:
       json.dump(str(data2), f)
 
-  #help invites (InviteManager)
+  #help command
   if messagecontent == prefix + 'help':
     embed = discord.Embed(color=0xFFFFFF, description="These are all the available commands. The prefix is `"+prefix+"`. You can change this at any time with `"+prefix+"prefix <newPrefix>`.\n")
     embed.set_author(name=client.user.name + " Help")
@@ -118,6 +118,65 @@ async def on_message(message):
     embed.add_field(name="`"+prefix+ "iroles`", value="Display all invite role rewards", inline=False)
     embed.add_field(name="`"+prefix+ "fetch invites`", value="Fetch all previous invites", inline=False)
     embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
+    await message.channel.send(embed=embed)
+
+  if messagecontent.startswith(prefix + 'invites'):
+    #get user (member object)
+    isInGuild = False
+    minusMessageContent = message.content.replace("<","").replace(">","").replace("@","").replace("!","")
+    if (messagecontent == prefix + 'invites'):
+      user = message.author
+      isInGuild = True
+    else:
+      dbUser = None
+      #get db user
+      if str(minusMessageContent[-18:]) in db[str(message.guild.id)]:
+        dbUser = db[str(message.guild.id)][str(minusMessageContent[-18:])]
+      else:
+        embed = discord.Embed(color=0xFF0000, description="Invalid user or user has no invites.")
+        embed.set_author(name="Error")
+        await message.channel.send(embed=embed)
+        return
+      #get actual member
+      if message.guild.get_member(int(minusMessageContent[-18:])) != None:
+        user = message.guild.get_member(int(minusMessageContent[-18:]))
+        isInGuild = True
+    #get vars
+    if isInGuild:
+      Name = user.name + "#" + str(user.discriminator)
+      Pfp = user.avatar_url
+      Invites = db[str(message.guild.id)][str(user.id)][2]
+      Leaves = db[str(message.guild.id)][str(user.id)][3]
+      inviterUser = db[str(message.guild.id)][str(user.id)][1]
+      joinCode = db[str(message.guild.id)][str(user.id)][0]
+    else:
+      Name = "<@"+str(minusMessageContent[-18:])+">"
+      Pfp = ""
+      Invites = db[str(message.guild.id)][str(minusMessageContent[-18:])][2]
+      Leaves = db[str(message.guild.id)][str(minusMessageContent[-18:])][3]
+      inviterUser = db[str(message.guild.id)][str(minusMessageContent[-18:])][1]
+      joinCode = db[str(message.guild.id)][str(minusMessageContent[-18:])][0]
+    totalInvites = Invites - Leaves
+    #check for invite code and inviter
+    print(4)
+    print(joinCode + "|")
+    if joinCode != "":
+      print(0)
+      getMember = message.guild.get_member(int(inviterUser))
+      if getMember != None:
+        print(1)
+        text = getMember.name + "#" + str(getMember.discriminator)
+      else:
+        print(2)
+        text = "<@"+str(inviterUser)+">"
+      addition = "\nInvited by: " + text + " with code **"+joinCode+"**"
+    else:
+      addition = ""
+    embed = discord.Embed(color=0x00FF00, description="User has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)"+addition)
+    if isInGuild:
+      embed.set_author(name="@" + Name, icon_url=Pfp)
+    else:
+      embed = discord.Embed(color=0x00FF00, description=Name+"\nUser has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)"+addition)
     await message.channel.send(embed=embed)
 
 
