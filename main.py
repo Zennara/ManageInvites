@@ -129,10 +129,11 @@ async def on_message(message):
     embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
     await message.channel.send(embed=embed)
 
+  minusMessageContent = messagecontent.replace("<","").replace(">","").replace("@","").replace("!","")
+  
   if messagecontent.startswith(prefix + 'invites'):
     #get user (member object)
     isInGuild = False
-    minusMessageContent = message.content.replace("<","").replace(">","").replace("@","").replace("!","")
     if (messagecontent == prefix + 'invites'):
       user = message.author
       isInGuild = True
@@ -182,50 +183,56 @@ async def on_message(message):
     await message.channel.send(embed=embed)
 
   #edit amounts
-    if messagecontent.startswith(prefix + "edit"):
-        if checkPerms(message):
-          #run in try's in case of error
-          #get user (member object)
-          try:
-            try:
-              if message.content[-18:].isdigit():
-                user = message.guild.get_member(int(message.content[-18:]))
+  if messagecontent.startswith(prefix + "edit"):
+    if checkPerms(message):
+      #split content
+      splits = minusMessageContent.split()
+      #check argument amounts
+      if len(splits) >= 3 and len(splits) <= 4:
+        #get leaves/Invites
+        if splits[1] == "invites" or splits[1] == "leaves":
+          #check if 2nd arg is a number
+          if splits[2].isnumeric():
+            #check for limits
+            if int(splits[2]) > 0 and int(splits[2]) < 1000000000:
+              if len(splits) == 4:
+                #check if user id at end of message is in db
+                if str(minusMessageContent[-18:]) not in db[str(message.guild.id)]:
+                  #check numeric
+                  if minusMessageContent[-18:].isnumeric():
+                    #check if proper member
+                    if message.guild.get_member(int(minusMessageContent[-18:])):
+                      #write to db
+                      db[str(message.guild.id)][str(minusMessageContent[-18:])] = ["",0,0,0]
+                    else:
+                      await error(message, "User does not exist in the server cache.")
+                      return
+                  else:
+                    await error(message, "User does not exist in the server cache.")
+                    return
+                user = str(minusMessageContent[-18:])
               else:
-                user = message.guild.get_member(int(message.content[-19:-1]))
-              test = user.id
-            except:
-              if message.content[-18:].isdigit():
-                user = await client.fetch_user(message.content[-18:])
+                user = str(message.author.id)
+              #get change amount
+              if splits[1] == "invites":
+                change = 2
               else:
-                user = await client.fetch_user(message.content[-19:-1])
-          except:
-            user = message.author
-          try:      
-            #get type
-            editType = messagecontent.split()[1]
-
-            #get previous invites amount
-            prevAmount = data[str(user.id)][str(editType)]
-
-            editAmount = int(messagecontent.split()[2])
-
-            if editType == "invites" or editType == "leaves" or editType == "bumps":
-              #data[str(message.guild.id) + str(user.id)][str(editType)] = "5"
-
-              tmp = data[str(user.id)]
-              del data[str(user.id)]
-              tmp[editType] = editAmount
-              data[str(user.id)] = tmp
-
-              #send embed
-              embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
-              embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
-              embed.set_footer(text=nowDate + " at " + nowTime)
+                change = 3
+              #set change amount
+              db[str(message.guild.id)][user][change] = int(splits[2])
+              #send confirmation message
+              embed = discord.Embed(color=0x00FF00, description="User now has **"+splits[2]+"** "+splits[1]+".")
               await message.channel.send(embed=embed)
-          except:
-            pass
+            else:
+              await error(message, "Number out of range. This should be between `0` and `1,000,000,000`.")
+          else:
+            await error(message, "Invalid amount. This should be a number.")
         else:
-          await error(message, "You do not have the proper permission: `MANAGE_GUILD`")
+          await error(message, "Invalid edit type. The first argument should be `invites` or `leaves`.")
+      else:
+        await error(message, "Invalid argument amount. Must be between `2` and `3`.")
+    else:
+      await error(message, "You do not have the proper permission: `MANAGE_GUILD`")
 
 
 @client.event
