@@ -252,7 +252,6 @@ async def on_message(message):
     embed = discord.Embed(color=0xFFFFFF, description="Loading . . .\n*This may take a few seconds.*")
     embed.set_author(name=message.guild.name+" Invite Leaderboard", icon_url=message.guild.icon_url) 
     message2 = await message.channel.send(embed=embed)
-          
     tmp = {}
     tmp = dict(db[str(message.guild.id)])
     #make new dictionary to sort
@@ -265,7 +264,6 @@ async def on_message(message):
           tempdata[key] = tmp[key][2] - tmp[key][3]
     #sort data
     order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
-
     #get page number
     page = 1
     page = int(page)
@@ -278,7 +276,6 @@ async def on_message(message):
         embed = discord.Embed(color=0xFF0000, description="Invalid Page. Currently, this should be between `1` and `"+str(math.ceil(len(order) / 10))+"`.")
         await message2.edit(embed=embed)
         return
-
     if int(page) >= 1 and int(page) <= math.ceil(len(order) / 10):
       #store all the users in inputText to later print
       inputText = ""
@@ -287,7 +284,6 @@ async def on_message(message):
         if count <= page * 10 and count >= page * 10 - 9:
           inputText += "\n`[" + str(count) +"]` <@!" + str(i[0]) + "> | **" + str(i[1]) + "** invites (**" + str(tmp[str(i[0])][2]) + "** regular, **-" + str(tmp[str(i[0])][3]) + "** leaves)"
         count += 1
-
       #print embed
       embed = discord.Embed(color=0x00FF00, description=inputText)
       embed.set_author(name=message.guild.name+" Invite Leaderboard", icon_url=message.guild.icon_url)
@@ -296,6 +292,7 @@ async def on_message(message):
     else:
       embed = discord.Embed(color=0xFF0000, description="Invalid Page. Currently, this should be between `1` and `"+str(math.ceil(len(order) / 10))+"`.")
       await message2.edit(embed=embed)
+
 
 @client.event
 async def on_guild_join(guild):
