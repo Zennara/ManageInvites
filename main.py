@@ -42,6 +42,10 @@ async def getInvites():
       invites = tmp 
     await asyncio.sleep(1)
 
+async def error(message, code):
+  embed = discord.Embed(color=0xff0000, description=code)
+  await message.channel.send(embed=embed)
+
 def checkPerms(message):
   if message.author.guild_permissions.manage_guild:
     return True
