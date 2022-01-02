@@ -234,6 +234,19 @@ async def on_message(message):
     else:
       await error(message, "You do not have the proper permission: `MANAGE_GUILD`")
 
+  #change prefix
+  if messagecontent.startswith(prefix + "prefix"):
+    if checkPerms(message):
+      if not any(x in messagecontent for x in ["!","_","~","*","`","<",">","@","&"]):
+        if len(messagecontent) <= len(prefix) + 10:
+          db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
+          embed = discord.Embed(color=0x00FF00, description ="Prefix is now `" + message.content.split()[1:][0] + "`")
+          embed.set_author(name="Prefix Change")
+          await message.channel.send(embed=embed)
+        else:
+          await error(message, "Prefix must be between `1` and `3` characters.")
+      else:
+        await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `<` , `>` , `@` , `&` , `!`")
 
 @client.event
 async def on_guild_join(guild):
