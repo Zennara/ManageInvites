@@ -158,16 +158,11 @@ async def on_message(message):
       joinCode = dbUser[0]
     totalInvites = Invites - Leaves
     #check for invite code and inviter
-    print(4)
-    print(joinCode + "|")
     if joinCode != "":
-      print(0)
       getMember = message.guild.get_member(int(inviterUser))
       if getMember != None:
-        print(1)
         text = "**"+getMember.name + "#" + str(getMember.discriminator)+"**"
       else:
-        print(2)
         text = "<@"+str(inviterUser)+">"
       addition = "\nInvited by: " + text + " with code **"+joinCode+"**"
     else:
