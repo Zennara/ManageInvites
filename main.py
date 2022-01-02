@@ -142,7 +142,7 @@ async def on_message(message):
       if str(minusMessageContent[-18:]) in db[str(message.guild.id)]:
         dbUser = db[str(message.guild.id)][str(minusMessageContent[-18:])]
       else:
-        error(message, "Invalid user or user has no invites.")
+        await error(message, "Invalid user or user has no invites.")
         return
       #get actual member
       if message.guild.get_member(int(minusMessageContent[-18:])) != None:
@@ -181,7 +181,51 @@ async def on_message(message):
       embed = discord.Embed(color=0x00FF00, description=Name+"\nUser has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)"+addition)
     await message.channel.send(embed=embed)
 
-  checkPerms(message)
+  #edit amounts
+    if messagecontent.startswith(prefix + "edit"):
+        if checkPerms(message):
+          #run in try's in case of error
+          #get user (member object)
+          try:
+            try:
+              if message.content[-18:].isdigit():
+                user = message.guild.get_member(int(message.content[-18:]))
+              else:
+                user = message.guild.get_member(int(message.content[-19:-1]))
+              test = user.id
+            except:
+              if message.content[-18:].isdigit():
+                user = await client.fetch_user(message.content[-18:])
+              else:
+                user = await client.fetch_user(message.content[-19:-1])
+          except:
+            user = message.author
+          try:      
+            #get type
+            editType = messagecontent.split()[1]
+
+            #get previous invites amount
+            prevAmount = data[str(user.id)][str(editType)]
+
+            editAmount = int(messagecontent.split()[2])
+
+            if editType == "invites" or editType == "leaves" or editType == "bumps":
+              #data[str(message.guild.id) + str(user.id)][str(editType)] = "5"
+
+              tmp = data[str(user.id)]
+              del data[str(user.id)]
+              tmp[editType] = editAmount
+              data[str(user.id)] = tmp
+
+              #send embed
+              embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
+              embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+              embed.set_footer(text=nowDate + " at " + nowTime)
+              await message.channel.send(embed=embed)
+          except:
+            pass
+        else:
+          await error(message, "You do not have the proper permission: `MANAGE_GUILD`")
 
 
 @client.event
