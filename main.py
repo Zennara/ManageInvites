@@ -121,7 +121,7 @@ async def on_message(message):
     embed = discord.Embed(color=0xFFFFFF, description="These are all the available commands. The prefix is `"+prefix+"`. You can change this at any time with `"+prefix+"prefix <newPrefix>`.\n")
     embed.set_author(name=client.user.name + " Help")
     embed.add_field(name="`"+prefix+ "invites [member]`", value="Shows how many invites the user has", inline=False)
-    embed.add_field(name="`"+prefix+ "leaderboard`", value="Shows the invites leaderboard", inline=False)
+    embed.add_field(name="`"+prefix+ "leaderboard [page]`", value="Shows the invites leaderboard", inline=False)
     embed.add_field(name="`"+prefix+ "edit <invites|leaves> <amount> [member]`", value="Set invites or leaves of a user", inline=False)
     embed.add_field(name="`"+prefix+ "addirole <invites> <roleID>`", value="Add a new invite role reward", inline=False)
     embed.add_field(name="`"+prefix+ "delirole <invites> <roleID>`", value="Delete an invite role reward", inline=False)
