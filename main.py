@@ -42,6 +42,11 @@ async def getInvites():
       invites = tmp 
     await asyncio.sleep(1)
 
+def checkPerms(message):
+  if message.author.guild_permissions.manage_guild:
+    return True
+  else:
+    asyncio.create_task(error(message, "You do not have the valid permission: `Manage Webhooks`."))
 
 
 @client.event
@@ -173,6 +178,8 @@ async def on_message(message):
     else:
       embed = discord.Embed(color=0x00FF00, description=Name+"\nUser has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)"+addition)
     await message.channel.send(embed=embed)
+
+  checkPerms(message)
 
 
 @client.event
