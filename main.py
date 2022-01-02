@@ -50,7 +50,7 @@ def checkPerms(message):
   if message.author.guild_permissions.manage_guild:
     return True
   else:
-    asyncio.create_task(error(message, "You do not have the valid permission: `Manage Webhooks`."))
+    asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
 
 
 @client.event
@@ -231,8 +231,6 @@ async def on_message(message):
           await error(message, "Invalid edit type. The first argument should be `invites` or `leaves`.")
       else:
         await error(message, "Invalid argument amount. Must be between `2` and `3`.")
-    else:
-      await error(message, "You do not have the proper permission: `MANAGE_GUILD`")
 
   #change prefix
   if messagecontent.startswith(prefix + "prefix"):
