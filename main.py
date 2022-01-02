@@ -152,10 +152,10 @@ async def on_message(message):
     else:
       Name = "<@"+str(minusMessageContent[-18:])+">"
       Pfp = ""
-      Invites = db[str(message.guild.id)][str(minusMessageContent[-18:])][2]
-      Leaves = db[str(message.guild.id)][str(minusMessageContent[-18:])][3]
-      inviterUser = db[str(message.guild.id)][str(minusMessageContent[-18:])][1]
-      joinCode = db[str(message.guild.id)][str(minusMessageContent[-18:])][0]
+      Invites = dbUser[2]
+      Leaves = dbUser[3]
+      inviterUser = dbUser[1]
+      joinCode = dbUser[0]
     totalInvites = Invites - Leaves
     #check for invite code and inviter
     print(4)
@@ -165,7 +165,7 @@ async def on_message(message):
       getMember = message.guild.get_member(int(inviterUser))
       if getMember != None:
         print(1)
-        text = getMember.name + "#" + str(getMember.discriminator)
+        text = "**"+getMember.name + "#" + str(getMember.discriminator)+"**"
       else:
         print(2)
         text = "<@"+str(inviterUser)+">"
