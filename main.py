@@ -58,10 +58,11 @@ async def on_member_join(member):
   global invite
 
   print(invite.inviter.name)
-  #add new member into database
+  #add new member into db
   if str(member.id) not in db[str(member.guild.id)]:
     db[str(member.guild.id)][str(member.id)] = [str(invite.code),invite.inviter.id,0,0]
   #add invite to inviter
+  #chcek if inviter in db
   if str(invite.inviter.id) not in db[str(member.guild.id)]:
     db[str(member.guild.id)][str(invite.inviter.id)] = ["",0,0,0]
   db[str(member.guild.id)][str(invite.inviter.id)][2] += 1
@@ -71,17 +72,14 @@ async def on_member_join(member):
 async def on_member_remove(member):
   #add to leaves
   #chcek if left member is in db
-  print(1)
   if str(member.id) in db[str(member.guild.id)]:
-    print(2)
     #ensure there was inviter
     if db[str(member.guild.id)][str(member.id)][0] != "":
-      print(3)
-      #check if inviter is in server
-      if str(db[str(member.guild.id)][str(member.id)][1]) in db[str(member.guild.id)]:
-        print(4)
-        #add to inviter leaves
-        db[str(member.guild.id)][str(db[str(member.guild.id)][str(member.id)][1])][3] += 1
+      #check if inviter is in db
+      if str(db[str(member.guild.id)][str(member.id)][1]) not in db[str(member.guild.id)]:
+        db[str(member.guild.id)][str(db[str(member.guild.id)][str(member.id)][1])]= ["",0,0,0]
+      #add to inviter leaves
+      db[str(member.guild.id)][str(db[str(member.guild.id)][str(member.id)][1])][3] += 1
 
 
 @client.event
