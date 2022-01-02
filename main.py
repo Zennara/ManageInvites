@@ -142,9 +142,7 @@ async def on_message(message):
       if str(minusMessageContent[-18:]) in db[str(message.guild.id)]:
         dbUser = db[str(message.guild.id)][str(minusMessageContent[-18:])]
       else:
-        embed = discord.Embed(color=0xFF0000, description="Invalid user or user has no invites.")
-        embed.set_author(name="Error")
-        await message.channel.send(embed=embed)
+        error(message, "Invalid user or user has no invites.")
         return
       #get actual member
       if message.guild.get_member(int(minusMessageContent[-18:])) != None:
