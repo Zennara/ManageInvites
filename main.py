@@ -255,7 +255,6 @@ async def on_message(message):
           
     tmp = {}
     tmp = dict(db[str(message.guild.id)])
-    print(tmp)
     #make new dictionary to sort
     tempdata = {}
     for key in tmp.keys():
@@ -264,33 +263,38 @@ async def on_message(message):
         #check if it has any invitees or leaves
         if tmp[key][3] != 0 or tmp[key][2] != 0:
           tempdata[key] = tmp[key][2] - tmp[key][3]
-    print("\n\n\n"+str(tempdata))
     #sort data
     order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
-    print(order)
 
     #get page number
     page = 1
     page = int(page)
-    try:
-      page = messagecontent.split()[1]
-      page = int(page)
-    except:
-      pass
+    cnt = messagecontent.split()
+    #check length
+    if len(cnt) > 1:
+      if str(cnt[1]).isnumeric():
+        page = int(messagecontent.split()[1])
+      else:
+        embed = discord.Embed(color=0xFF0000, description="Invalid Page. Currently, this should be between `1` and `"+str(math.ceil(len(order) / 10))+"`.")
+        await message2.edit(embed=embed)
+        return
 
-    if int(page) >= 1 and int(page) <= math.ceil(len(message.guild.members) / 10):
+    if int(page) >= 1 and int(page) <= math.ceil(len(order) / 10):
       #store all the users in inputText to later print
       inputText = ""
       count = 1
       for i in order:
         if count <= page * 10 and count >= page * 10 - 9:
-          inputText += "\n`[" + str(count) +"]` <@!" + str(i[0]) + "> - **" + str(i[1]) + "** invites (**" + str(tmp[str(i[0])][2]) + "** regular, **-" + str(tmp[str(i[0])][3]) + "** leaves)"
+          inputText += "\n`[" + str(count) +"]` <@!" + str(i[0]) + "> | **" + str(i[1]) + "** invites (**" + str(tmp[str(i[0])][2]) + "** regular, **-" + str(tmp[str(i[0])][3]) + "** leaves)"
         count += 1
 
       #print embed
       embed = discord.Embed(color=0x00FF00, description=inputText)
       embed.set_author(name=message.guild.name+" Invite Leaderboard", icon_url=message.guild.icon_url)
-      embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(message.guild.members) / 10)))
+      embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(order) / 10)))
+      await message2.edit(embed=embed)
+    else:
+      embed = discord.Embed(color=0xFF0000, description="Invalid Page. Currently, this should be between `1` and `"+str(math.ceil(len(order) / 10))+"`.")
       await message2.edit(embed=embed)
 
 @client.event
