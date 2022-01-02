@@ -195,7 +195,7 @@ async def on_message(message):
           #check if 2nd arg is a number
           if splits[2].isnumeric():
             #check for limits
-            if int(splits[2]) > 0 and int(splits[2]) < 1000000000:
+            if int(splits[2]) >= 0 and int(splits[2]) < 1000000000:
               if len(splits) == 4:
                 #check if user id at end of message is in db
                 if str(minusMessageContent[-18:]) not in db[str(message.guild.id)]:
