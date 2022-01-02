@@ -8,6 +8,7 @@ import asyncio
 import json
 import requests
 from replit import db
+import math
 
 #api limit checker
 r = requests.head(url="https://discord.com/api/v1")
@@ -245,6 +246,52 @@ async def on_message(message):
           await error(message, "Prefix must be between `1` and `3` characters.")
       else:
         await error(message, "Prefix can not contain `` ` `` , `_` , `~` , `*` , `<` , `>` , `@` , `&` , `!`")
+
+  #invite leaderboard
+  if messagecontent.startswith(prefix + "leaderboard"):
+    embed = discord.Embed(color=0xFFFFFF, description="Loading . . .\n*This may take a few seconds.*")
+    embed.set_author(name=message.guild.name+" Invite Leaderboard", icon_url=message.guild.icon_url) 
+    message2 = await message.channel.send(embed=embed)
+          
+    tmp = {}
+    tmp = dict(db[str(message.guild.id)])
+    print(tmp)
+    #make new dictionary to sort
+    tempdata = {}
+    for key in tmp.keys():
+      #all other dataEntries
+      if not key.endswith('irole') and key != "prefix":
+        #check if it has any invitees or leaves
+        if tmp[key][3] != 0 or tmp[key][2] != 0:
+          tempdata[key] = tmp[key][2] - tmp[key][3]
+    print("\n\n\n"+str(tempdata))
+    #sort data
+    order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
+    print(order)
+
+    #get page number
+    page = 1
+    page = int(page)
+    try:
+      page = messagecontent.split()[1]
+      page = int(page)
+    except:
+      pass
+
+    if int(page) >= 1 and int(page) <= math.ceil(len(message.guild.members) / 10):
+      #store all the users in inputText to later print
+      inputText = ""
+      count = 1
+      for i in order:
+        if count <= page * 10 and count >= page * 10 - 9:
+          inputText += "\n`[" + str(count) +"]` <@!" + str(i[0]) + "> - **" + str(i[1]) + "** invites (**" + str(tmp[str(i[0])][2]) + "** regular, **-" + str(tmp[str(i[0])][3]) + "** leaves)"
+        count += 1
+
+      #print embed
+      embed = discord.Embed(color=0x00FF00, description=inputText)
+      embed.set_author(name=message.guild.name+" Invite Leaderboard", icon_url=message.guild.icon_url)
+      embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(message.guild.members) / 10)))
+      await message2.edit(embed=embed)
 
 @client.event
 async def on_guild_join(guild):
