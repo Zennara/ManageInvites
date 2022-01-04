@@ -78,8 +78,8 @@ async def on_member_join(member):
 
   #add to invites
   for irole in db[str(member.guild.id)]["iroles"]:
-    if db[str(member.guild.id)][str(invite.inviter.id)][2] >= db[str(member.guild.id)]["iroles"][irole]:
-      await invite.inviter.add_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
+    if db[str(member.guild.id)][str(invite.inviter.id)][2] - db[str(member.guild.id)][str(invite.inviter.id)][3] >= db[str(member.guild.id)]["iroles"][irole]:
+      await member.guild.get_member(invite.inviter.id).add_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
 
 
 @client.event
@@ -160,6 +160,9 @@ async def on_message(message):
         isInGuild = True
     #get vars
     if isInGuild:
+      #check if in guild
+      if str(user.id) not in db[str(message.guild.id)]:
+        db[str(message.guild.id)][str(user.id)] = ["",0,0,0]
       Name = user.name + "#" + str(user.discriminator)
       Pfp = user.avatar_url
       Invites = db[str(message.guild.id)][str(user.id)][2]
