@@ -107,6 +107,7 @@ async def on_member_remove(member):
         db[str(member.guild.id)][str(db[str(member.guild.id)][str(member.id)][1])]= ["",0,0,0]
       #add to inviter leaves
       db[str(member.guild.id)][str(db[str(member.guild.id)][str(member.id)][1])][3] += 1
+      await checkRewards(member.guild.get_member(int(db[str(member.guild.id)][str(member.id)][1])))
 
 
 @client.event
