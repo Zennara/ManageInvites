@@ -273,7 +273,7 @@ async def on_message(message):
   if messagecontent.startswith(prefix + "leaderboard"):
     embed = discord.Embed(color=0xFFFFFF, description="*This may take a few seconds.*")
     embed.set_author(name="⌛ | Leaderboard Loading...", icon_url=message.guild.icon_url)
-    embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
+    embed.add_field(name="᲼",value="\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
     message2 = await message.channel.send(embed=embed)
     tmp = {}
     tmp = dict(db[str(message.guild.id)])
@@ -281,7 +281,7 @@ async def on_message(message):
     tempdata = {}
     for key in tmp.keys():
       #all other dataEntries
-      if not key.endswith('irole') and key != "prefix":
+      if key != "iroles" and key != "prefix":
         #check if it has any invitees or leaves
         if tmp[key][3] != 0 or tmp[key][2] != 0:
           tempdata[key] = tmp[key][2] - tmp[key][3]
