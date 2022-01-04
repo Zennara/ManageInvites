@@ -365,7 +365,7 @@ async def on_message(message):
                 #check if role exists in db already
                 if newContent[2]+"irole" not in db[str(message.guild.id)]:
                   role = message.guild.get_role(int(newContent[2]))
-                  #db[str(message.guild.id)][str(role.id)+"irole"] = int(newContent[1])
+                  db[str(message.guild.id)][str(role.id)+"irole"] = int(newContent[1])
                   embed = discord.Embed(color=0x00FF00, description="Users will now recieve the role "+role.mention+" if they invite **"+newContent[1]+"** member" + ("" if newContent[1] == "1" else "s") + ".")
                   await message.channel.send(embed=embed)
                 else:
