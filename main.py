@@ -351,7 +351,35 @@ async def on_message(message):
   #add irole
   if messagecontent.startswith(prefix + "addirole"):
     if checkPerms(message):
-      messagecontent.split()
+      newContent = minusMessageContent.split()
+      #check if enough args
+      if len(newContent) == 3:
+        #check if second arg is number
+        if newContent[1].isnumeric():
+          #check if number is too big
+          if int(newContent[1]) >= 0 and int(newContent[1]) < 1000000000:
+            #check if roleID is a number
+            if newContent[2].isnumeric():
+              #check if its a valid role in the guild
+              if message.guild.get_role(int(newContent[2])):
+                #check if role exists in db already
+                if newContent[2]+"irole" not in db[str(message.guild.id)]:
+                  role = message.guild.get_role(int(newContent[2]))
+                  #db[str(message.guild.id)][str(role.id)+"irole"] = int(newContent[1])
+                  embed = discord.Embed(color=0x00FF00, description="Users will now recieve the role "+role.mention+" if they invite **"+newContent[1]+"** member" + ("" if newContent[1] == "1" else "s") + ".")
+                  await message.channel.send(embed=embed)
+                else:
+                  await error(message, "Role already has a reward assigned to it.")
+              else:
+                await error(message, "Invalid role. Check your ID or mention.")
+            else:
+              await error(message, "The argument, `<role>` needs to be the role mention or ID.")
+          else:
+            await error(message, "Number out of range. This should be between `0` and `1,000,000,000`.")
+        else:
+          await error(message, "Invalid amount. This should be a number.")
+      else:
+        await error(message, "Invalid argument amount. This must be `<invites> <role>`.")
 
 
 @client.event
