@@ -124,7 +124,7 @@ async def on_message(message):
     embed.add_field(name="`"+prefix+ "leaderboard [page]`", value="Shows the invites leaderboard", inline=False)
     embed.add_field(name="`"+prefix+ "edit <invites|leaves> <amount> [member]`", value="Set invites or leaves of a user", inline=False)
     embed.add_field(name="`"+prefix+ "addirole <invites> <roleID>`", value="Add a new invite role reward", inline=False)
-    embed.add_field(name="`"+prefix+ "delirole <invites> <roleID>`", value="Delete an invite role reward", inline=False)
+    embed.add_field(name="`"+prefix+ "delirole <roleID>`", value="Delete an invite role reward", inline=False)
     embed.add_field(name="`"+prefix+ "iroles`", value="Display all invite role rewards", inline=False)
     embed.add_field(name="`"+prefix+ "fetch`", value="Fetch all previous invites", inline=False)
     embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
@@ -380,6 +380,31 @@ async def on_message(message):
           await error(message, "Invalid amount. This should be a number.")
       else:
         await error(message, "Invalid argument amount. This must be `<invites> <role>`.")
+
+  #delete irole
+  if messagecontent.startswith(prefix + "delirole"):
+    if checkPerms(message):
+      newContent = minusMessageContent.split()
+      #check if enough args
+      if len(newContent) == 2:
+        #check if second arg is number
+        if newContent[1].isnumeric():
+          #check if its a valid role in the guild
+          if message.guild.get_role(int(newContent[1])):
+            #check if role exists in db already
+            if newContent[1]+"irole" in db[str(message.guild.id)]:
+              role = message.guild.get_role(int(newContent[1]))
+              del db[str(message.guild.id)][str(role.id)+"irole"]
+              embed = discord.Embed(color=0x00FF00, description="The role reward for " +role.mention+ " has been **deleted**.")
+              await message.channel.send(embed=embed)
+            else:
+              await error(message, "No current reward for specified role.")
+          else:
+            await error(message, "Invalid role. Check your ID or mention.")
+        else:
+          await error(message, "The argument, `<role>` needs to be the role mention or ID.")
+      else:
+        await error(message, "Invalid argument amount. This must be `<role>`.")
 
 
 @client.event
