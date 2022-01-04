@@ -406,6 +406,24 @@ async def on_message(message):
       else:
         await error(message, "Invalid argument amount. This must be `<role>`.")
 
+  #show all invite role-rewards
+  if messagecontent == prefix + "iroles":
+    count = 0
+    #get all RR messages
+    embed = discord.Embed(color=0x00FF00, description="**Invite Role-Rewards**")
+    embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+    for k in db[str(message.guild.id)]:
+      if k.endswith("irole"):
+        if count == 25:
+          count = 0
+          await message.channel.send(embed=embed)
+          embed = discord.Embed(color=0x00FF00, description="")
+        irole = k[0:-5]
+        embed.add_field(name="Invites: "+str(db[str(message.guild.id)][irole+"irole"]), value="**Role:** <@&" + irole + ">")
+        count += 1
+    await message.channel.send(embed=embed)
+        
+
 
 @client.event
 async def on_guild_join(guild):
