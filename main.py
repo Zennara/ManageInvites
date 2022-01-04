@@ -71,7 +71,7 @@ async def on_member_join(member):
   if str(member.id) not in db[str(member.guild.id)]:
     db[str(member.guild.id)][str(member.id)] = [str(invite.code),invite.inviter.id,0,0]
   #add invite to inviter
-  #chcek if inviter in db
+  #check if inviter in db
   if str(invite.inviter.id) not in db[str(member.guild.id)]:
     db[str(member.guild.id)][str(invite.inviter.id)] = ["",0,0,0]
   db[str(member.guild.id)][str(invite.inviter.id)][2] += 1
@@ -101,6 +101,7 @@ async def on_message(message):
 
   if messagecontent == "i/clear":
     db[str(message.guild.id)] = {"prefix": "i/"}
+    db[str(message.guild.id)]["iroles"] = {}
 
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
@@ -363,9 +364,9 @@ async def on_message(message):
               #check if its a valid role in the guild
               if message.guild.get_role(int(newContent[2])):
                 #check if role exists in db already
-                if newContent[2]+"irole" not in db[str(message.guild.id)]:
+                if newContent[2] not in db[str(message.guild.id)]["iroles"]:
                   role = message.guild.get_role(int(newContent[2]))
-                  db[str(message.guild.id)][str(role.id)+"irole"] = int(newContent[1])
+                  db[str(message.guild.id)]["iroles"][str(role.id)] = int(newContent[1])
                   embed = discord.Embed(color=0x00FF00, description="Users will now recieve the role "+role.mention+" if they invite **"+newContent[1]+"** member" + ("" if newContent[1] == "1" else "s") + ".")
                   await message.channel.send(embed=embed)
                 else:
@@ -392,9 +393,9 @@ async def on_message(message):
           #check if its a valid role in the guild
           if message.guild.get_role(int(newContent[1])):
             #check if role exists in db already
-            if newContent[1]+"irole" in db[str(message.guild.id)]:
+            if newContent[1] in db[str(message.guild.id)]["iroles"]:
               role = message.guild.get_role(int(newContent[1]))
-              del db[str(message.guild.id)][str(role.id)+"irole"]
+              del db[str(message.guild.id)]["iroles"][str(role.id)]
               embed = discord.Embed(color=0x00FF00, description="The role reward for " +role.mention+ " has been **deleted**.")
               await message.channel.send(embed=embed)
             else:
@@ -412,15 +413,13 @@ async def on_message(message):
     #get all RR messages
     embed = discord.Embed(color=0x00FF00, description="**Invite Role-Rewards**")
     embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
-    for k in db[str(message.guild.id)]:
-      if k.endswith("irole"):
-        if count == 25:
-          count = 0
-          await message.channel.send(embed=embed)
-          embed = discord.Embed(color=0x00FF00, description="")
-        irole = k[0:-5]
-        embed.add_field(name="Invites: "+str(db[str(message.guild.id)][irole+"irole"]), value="**Role:** <@&" + irole + ">")
-        count += 1
+    for irole in db[str(message.guild.id)]["iroles"]:
+      if count == 25:
+        count = 0
+        await message.channel.send(embed=embed)
+        embed = discord.Embed(color=0x00FF00, description="")
+      embed.add_field(name="Invites: "+str(db[str(message.guild.id)]["iroles"][irole]), value="**Role:** <@&" + irole + ">")
+      count += 1
     await message.channel.send(embed=embed)
         
 
@@ -428,6 +427,7 @@ async def on_message(message):
 @client.event
 async def on_guild_join(guild):
   db[str(guild.id)] = {"prefix": "i/"}
+  db[str(guild.id)]["iroles"] = {}
 
 
 
