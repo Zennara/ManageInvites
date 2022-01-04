@@ -9,6 +9,7 @@ import json
 import requests
 from replit import db
 import math
+import random
 
 #api limit checker
 r = requests.head(url="https://discord.com/api/v1")
@@ -45,6 +46,8 @@ async def getInvites():
 
 async def error(message, code):
   embed = discord.Embed(color=0xff0000, description=code)
+  if random.randint(1,3) == 1:
+    embed.add_field(name="᲼",value="\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
   await message.channel.send(embed=embed)
 
 def checkPerms(message):
@@ -112,6 +115,9 @@ async def on_message(message):
   #check for bots
   if message.author.bot:
     return
+
+  #get random
+  rand = True if random.randint(1,3) == 1 else False
 
   messagecontent = message.content.lower()
 
@@ -202,6 +208,8 @@ async def on_message(message):
       embed.set_author(name="@" + Name, icon_url=Pfp)
     else:
       embed = discord.Embed(color=0x00FF00, description=Name+"\nUser has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)"+addition)
+    if rand:
+      embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
     await message.channel.send(embed=embed)
 
   #edit amounts
@@ -244,6 +252,8 @@ async def on_message(message):
               db[str(message.guild.id)][user][change] = int(splits[2])
               #send confirmation message
               embed = discord.Embed(color=0x00FF00, description="User now has **"+splits[2]+"** "+splits[1]+".")
+              if rand:
+                embed.add_field(name="᲼",value="\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
               await message.channel.send(embed=embed)
               await checkRewards(message.guild.get_member(int(user)))
             else:
@@ -263,6 +273,8 @@ async def on_message(message):
           db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
           embed = discord.Embed(color=0x00FF00, description ="Prefix is now `" + message.content.split()[1:][0] + "`")
           embed.set_author(name="Prefix Change")
+          if rand:
+            embed.add_field(name="᲼",value="\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
           await message.channel.send(embed=embed)
         else:
           await error(message, "Prefix must be between `1` and `3` characters.")
@@ -310,6 +322,8 @@ async def on_message(message):
       #print embed
       embed = discord.Embed(color=0x00FF00, description=inputText)
       embed.set_author(name=message.guild.name+" Invite Leaderboard", icon_url=message.guild.icon_url)
+      if rand:
+        embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
       embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(order) / 10)))
       await message2.edit(embed=embed)
     else:
@@ -349,6 +363,7 @@ async def on_message(message):
         #check for confirm or cancel
         if reaction.emoji == '✅':
           embed = discord.Embed(color=0xFFFFFF, description="⌛ | **Loading Previous Invites**")
+          embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
           await message2.edit(embed=embed)
           #reset inviters invites
           for invite in await message.guild.invites():
@@ -365,6 +380,8 @@ async def on_message(message):
             #add to invites
             db[str(message.guild.id)][str(invite.inviter.id)][2] += int(invite.uses)
           embed = discord.Embed(color=0x00FF00, description="**Previous Invites Fetched**")
+          if rand:
+            embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
           await message2.edit(embed=embed)
         else:
           embed = discord.Embed(color=0x00FF00, description="Fetch invites cancelled.")
@@ -392,10 +409,11 @@ async def on_message(message):
                   if message.guild.get_member(int(client.user.id)).top_role > role:
                     db[str(message.guild.id)]["iroles"][str(role.id)] = int(newContent[1])
                     embed = discord.Embed(color=0x00FF00, description="Users will now recieve the role "+role.mention+" if they invite **"+newContent[1]+"** member" + ("" if newContent[1] == "1" else "s") + ".")
+                    if rand:
+                      embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
                     await message.channel.send(embed=embed)
                     for c in await message.guild.invites():
                       await checkRewards(message.guild.get_member(c.inviter.id))
-                    await checkRewards()
                   else:
                     await error(message, "The role " +role.mention+ " is too high in the server hierarchy.\nMy top role is " +message.guild.get_member(int(client.user.id)).top_role.mention+ ".")
                 else:
@@ -426,6 +444,8 @@ async def on_message(message):
               role = message.guild.get_role(int(newContent[1]))
               del db[str(message.guild.id)]["iroles"][str(role.id)]
               embed = discord.Embed(color=0x00FF00, description="The role reward for " +role.mention+ " has been **deleted**.")
+              if rand:
+                embed.add_field(name="᲼",value="\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
               await message.channel.send(embed=embed)
             else:
               await error(message, "No current reward for specified role.")
