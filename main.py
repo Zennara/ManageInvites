@@ -126,11 +126,11 @@ async def on_message(message):
     embed.add_field(name="`"+prefix+ "addirole <invites> <roleID>`", value="Add a new invite role reward", inline=False)
     embed.add_field(name="`"+prefix+ "delirole <invites> <roleID>`", value="Delete an invite role reward", inline=False)
     embed.add_field(name="`"+prefix+ "iroles`", value="Display all invite role rewards", inline=False)
-    embed.add_field(name="`"+prefix+ "fetch invites`", value="Fetch all previous invites", inline=False)
+    embed.add_field(name="`"+prefix+ "fetch`", value="Fetch all previous invites", inline=False)
     embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
     await message.channel.send(embed=embed)
 
-  minusMessageContent = messagecontent.replace("<","").replace(">","").replace("@","").replace("!","")
+  minusMessageContent = messagecontent.replace("<","").replace(">","").replace("@","").replace("!","").replace("&","")
   
   if messagecontent.startswith(prefix + 'invites'):
     #get user (member object)
@@ -236,7 +236,7 @@ async def on_message(message):
   #change prefix
   if messagecontent.startswith(prefix + "prefix"):
     if checkPerms(message):
-      if not any(x in messagecontent for x in ["!","_","~","*","`","<",">","@","&"]):
+      if not any(x in messagecontent for x in ["!","`","<",">","@","&"]):
         if len(messagecontent) <= len(prefix) + 10:
           db[str(message.guild.id)]["prefix"] = message.content.lower().split()[1:][0]
           embed = discord.Embed(color=0x00FF00, description ="Prefix is now `" + message.content.split()[1:][0] + "`")
@@ -249,8 +249,8 @@ async def on_message(message):
 
   #invite leaderboard
   if messagecontent.startswith(prefix + "leaderboard"):
-    embed = discord.Embed(color=0xFFFFFF, description="Loading . . .\n*This may take a few seconds.*")
-    embed.set_author(name=message.guild.name+" Invite Leaderboard", icon_url=message.guild.icon_url) 
+    embed = discord.Embed(color=0xFFFFFF, description="*This may take a few seconds.*")
+    embed.set_author(name="⌛ | Leaderboard Loading...", icon_url=message.guild.icon_url) 
     message2 = await message.channel.send(embed=embed)
     tmp = {}
     tmp = dict(db[str(message.guild.id)])
@@ -292,6 +292,66 @@ async def on_message(message):
     else:
       embed = discord.Embed(color=0xFF0000, description="Invalid Page. Currently, this should be between `1` and `"+str(math.ceil(len(order) / 10))+"`.")
       await message2.edit(embed=embed)
+
+  #fetch previous guild invites
+  if messagecontent == prefix+"fetch":
+    if checkPerms(message):
+      #local message
+      reactionMessage = None
+      #for await fucntion
+      async def reactionClearAsync(reaction, user):
+        await reaction.remove(user)
+      def check(reaction, user):
+        #check message and author
+        if reactionMessage == reaction.message and user == message.author:
+          #check reaction
+          if str(reaction.emoji) == '✅' or str(reaction.emoji) == '❌':
+            asyncio.create_task(reactionClearAsync(reaction, user))
+            return True
+      embed = discord.Embed(color=0x593695, description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ to confirm, or ❌ to cancel.")
+      embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
+      message2 = await message.channel.send(embed=embed)
+      reactionMessage = message2
+      await message2.add_reaction('✅')
+      await message2.add_reaction('⚫')
+      await message2.add_reaction('❌')
+      try:
+        #wait for reaction
+        reaction, user = await client.wait_for('reaction_add', timeout=15.0, check=check)
+      except asyncio.TimeoutError:
+        #timeout message
+        embed = discord.Embed(color=0xFF0000, description="Message timed out. Interactive messages time out after `15` seconds.")
+        await message2.edit(embed=embed)
+      else:
+        #check for confirm or cancel
+        if reaction.emoji == '✅':
+          embed = discord.Embed(color=0xFFFFFF, description="⌛ | **Loading Previous Invites**")
+          await message2.edit(embed=embed)
+          #reset inviters invites
+          for invite in await message.guild.invites():
+            #check if inviter in db
+            if str(invite.inviter.id) in db[str(message.guild.id)]:
+              #reset invites
+              db[str(message.guild.id)][str(invite.inviter.id)][2] = 0
+              db[str(message.guild.id)][str(invite.inviter.id)][3] = 0
+          #loop through invites in guild
+          for invite in await message.guild.invites():
+            #check if inviter in db
+            if str(invite.inviter.id) not in db[str(message.guild.id)]:
+              db[str(message.guild.id)][str(invite.inviter.id)] = ["",0,0,0]
+            #add to invites
+            db[str(message.guild.id)][str(invite.inviter.id)][2] += int(invite.uses)
+          embed = discord.Embed(color=0x00FF00, description="**Previous Invites Fetched**")
+          await message2.edit(embed=embed)
+        else:
+          embed = discord.Embed(color=0x00FF00, description="Fetch invites cancelled.")
+          await message2.edit(embed=embed)
+      await message2.clear_reactions()
+
+  #add irole
+  if messagecontent.startswith(prefix + "addirole"):
+    if checkPerms(message):
+      messagecontent.split()
 
 
 @client.event
