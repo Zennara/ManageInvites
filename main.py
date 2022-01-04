@@ -69,7 +69,6 @@ async def checkRewards(member):
     if db[str(member.guild.id)][str(member.id)][2] - db[str(member.guild.id)][str(member.id)][3] >= db[str(member.guild.id)]["iroles"][irole]:
       await member.guild.get_member(member.id).add_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
     elif str(member.guild.get_role(int(irole)).id) in roleIDs:
-      print(2)
       await member.guild.get_member(member.id).remove_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
 
 @client.event
