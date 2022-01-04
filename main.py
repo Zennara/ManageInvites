@@ -144,6 +144,7 @@ async def on_message(message):
     embed.add_field(name="`"+prefix+ "delirole <role>`", value="Delete an invite role reward", inline=False)
     embed.add_field(name="`"+prefix+ "iroles`", value="Display all invite role rewards", inline=False)
     embed.add_field(name="`"+prefix+ "fetch`", value="Fetch all previous invites", inline=False)
+    embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
     embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
     await message.channel.send(embed=embed)
 
@@ -271,7 +272,8 @@ async def on_message(message):
   #invite leaderboard
   if messagecontent.startswith(prefix + "leaderboard"):
     embed = discord.Embed(color=0xFFFFFF, description="*This may take a few seconds.*")
-    embed.set_author(name="⌛ | Leaderboard Loading...", icon_url=message.guild.icon_url) 
+    embed.set_author(name="⌛ | Leaderboard Loading...", icon_url=message.guild.icon_url)
+    embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
     message2 = await message.channel.send(embed=embed)
     tmp = {}
     tmp = dict(db[str(message.guild.id)])
