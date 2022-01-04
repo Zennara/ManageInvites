@@ -60,6 +60,18 @@ async def on_ready():
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="your invites"))
 
 
+async def checkRewards(member):
+  #add to invites
+  for irole in db[str(member.guild.id)]["iroles"]:
+    roleIDs = []
+    for role in member.roles:
+      roleIDs.append(str(role.id))
+    if db[str(member.guild.id)][str(member.id)][2] - db[str(member.guild.id)][str(member.id)][3] >= db[str(member.guild.id)]["iroles"][irole]:
+      await member.guild.get_member(member.id).add_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
+    elif str(member.guild.get_role(int(irole)).id) in roleIDs:
+      print(2)
+      await member.guild.get_member(member.id).remove_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
+
 @client.event
 async def on_member_join(member):
   #wait until getInvites() is done
@@ -76,16 +88,18 @@ async def on_member_join(member):
     db[str(member.guild.id)][str(invite.inviter.id)] = ["",0,0,0]
   db[str(member.guild.id)][str(invite.inviter.id)][2] += 1
 
+  await checkRewards(member.guild.get_member(invite.inviter.id))
+    
   #add to invites
-  for irole in db[str(member.guild.id)]["iroles"]:
-    if db[str(member.guild.id)][str(invite.inviter.id)][2] - db[str(member.guild.id)][str(invite.inviter.id)][3] >= db[str(member.guild.id)]["iroles"][irole]:
-      await member.guild.get_member(invite.inviter.id).add_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
+  #for irole in db[str(member.guild.id)]["iroles"]:
+  #  if db[str(member.guild.id)][str(invite.inviter.id)][2] - db[str(member.guild.id)][str(invite.inviter.id)][3] >= db[str(member.guild.id)]["iroles"][irole]:
+  #    await member.guild.get_member(invite.inviter.id).add_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
 
 
 @client.event
 async def on_member_remove(member):
   #add to leaves
-  #chcek if left member is in db
+  #check if left member is in db
   if str(member.id) in db[str(member.guild.id)]:
     #ensure there was inviter
     if db[str(member.guild.id)][str(member.id)][0] != "":
