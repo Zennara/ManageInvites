@@ -109,8 +109,6 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message(message):
-  for irole in db[str(message.guild.id)]["iroles"]:
-    print(irole)
   #check for bots
   if message.author.bot:
     return
