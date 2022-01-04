@@ -244,6 +244,7 @@ async def on_message(message):
               #send confirmation message
               embed = discord.Embed(color=0x00FF00, description="User now has **"+splits[2]+"** "+splits[1]+".")
               await message.channel.send(embed=embed)
+              await checkRewards(message.guild.get_member(int(user)))
             else:
               await error(message, "Number out of range. This should be between `0` and `1,000,000,000`.")
           else:
@@ -388,6 +389,9 @@ async def on_message(message):
                   db[str(message.guild.id)]["iroles"][str(role.id)] = int(newContent[1])
                   embed = discord.Embed(color=0x00FF00, description="Users will now recieve the role "+role.mention+" if they invite **"+newContent[1]+"** member" + ("" if newContent[1] == "1" else "s") + ".")
                   await message.channel.send(embed=embed)
+                  for invite in await message.guild.invites():
+                    await checkRewards(message.guild.get_member(invite.inviter.id))
+                  await checkRewards()
                 else:
                   await error(message, "Role already has a reward assigned to it.")
               else:
