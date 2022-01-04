@@ -388,12 +388,16 @@ async def on_message(message):
                 #check if role exists in db already
                 if newContent[2] not in db[str(message.guild.id)]["iroles"]:
                   role = message.guild.get_role(int(newContent[2]))
-                  db[str(message.guild.id)]["iroles"][str(role.id)] = int(newContent[1])
-                  embed = discord.Embed(color=0x00FF00, description="Users will now recieve the role "+role.mention+" if they invite **"+newContent[1]+"** member" + ("" if newContent[1] == "1" else "s") + ".")
-                  await message.channel.send(embed=embed)
-                  for invite in await message.guild.invites():
-                    await checkRewards(message.guild.get_member(invite.inviter.id))
-                  await checkRewards()
+                  #check role heirarchy
+                  if message.guild.get_member(int(client.user.id)).top_role > role:
+                    db[str(message.guild.id)]["iroles"][str(role.id)] = int(newContent[1])
+                    embed = discord.Embed(color=0x00FF00, description="Users will now recieve the role "+role.mention+" if they invite **"+newContent[1]+"** member" + ("" if newContent[1] == "1" else "s") + ".")
+                    await message.channel.send(embed=embed)
+                    for c in await message.guild.invites():
+                      await checkRewards(message.guild.get_member(c.inviter.id))
+                    await checkRewards()
+                  else:
+                    await error(message, "The role " +role.mention+ " is too high in the server hierarchy.\nMy top role is " +message.guild.get_member(int(client.user.id)).top_role.mention+ ".")
                 else:
                   await error(message, "Role already has a reward assigned to it.")
               else:
