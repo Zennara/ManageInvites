@@ -10,6 +10,7 @@ import requests
 from replit import db
 import math
 import random
+import datetime
 
 #api limit checker
 r = requests.head(url="https://discord.com/api/v1")
@@ -470,6 +471,27 @@ async def on_message(message):
       embed.add_field(name="Invites: "+str(db[str(message.guild.id)]["iroles"][irole]), value="**Role:** <@&" + irole + ">")
       count += 1
     await message.channel.send(embed=embed)
+
+  #return invite
+  if messagecontent == prefix + "invite":
+    if await message.guild.invites():
+      inviteText = "**Code** \_\_\_\_\_\_\_\_\_\_\_\_ **Uses** \_\_ **Expires in**\n"
+      for invite in await message.guild.invites():
+        if invite.inviter.id == message.author.id:
+          dTime = str(datetime.timedelta(seconds=invite.max_age))
+          if dTime != "0:00:00":
+            if "day" in dTime:
+              newTime = (dTime[0:6] if dTime.endswith("0:00:00") else dTime[8:]).replace(",","")
+            else:
+              newTime = dTime
+          else:
+            newTime = "Never"
+          inviteText = inviteText + "`" +invite.code+""+(" "*(15-len(invite.code)))+""+ " | " +str(invite.uses)+ " / " +(str(invite.max_uses) if invite.max_uses != 0 else "∞")+ " | " + newTime+ (" "*(15-len(newTime)))+"`"+invite.channel.mention +"\n"
+      embed = discord.Embed(color=0x00FF00, description=inviteText)
+      embed.set_author(name=message.author.name+"#"+str(message.author.discriminator)+"'s Invites", icon_url=message.author.avatar_url)
+      if rand:
+        embed.add_field(name="᲼",value="\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
+      await message.channel.send(embed=embed)
         
 
 
