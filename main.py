@@ -23,27 +23,27 @@ except:
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
-async def getInvites():
+#async def getInvites():
   #wait for bot to be ready
-  await client.wait_until_ready()
+#  await client.wait_until_ready()
   #loop forever to check invites constantly across servers
-  tmp = []
-  invites = {}
-  global invite
-  while True:
-    for guild in client.guilds:
-      invs = await guild.invites()
-      tmp = []
-      for i in invs:
-        for s in invites:
-          if s[0] == i.code:
-            if int(i.uses) > s[1]:
+#  tmp = []
+#  invites = {}
+#  global invite
+#  while True:
+#    for guild in client.guilds:
+#      invs = await guild.invites()
+#      tmp = []
+#      for i in invs:
+#        for s in invites:
+#          if s[0] == i.code:
+#            if int(i.uses) > s[1]:
               #get inviter id
-              invite = i
-              break
-        tmp.append(tuple((i.code, i.uses)))
-      invites = tmp 
-    await asyncio.sleep(1)
+#              invite = i
+#              await asyncio.sleep(1)
+#              break
+#        tmp.append(tuple((i.code, i.uses)))
+#      invites = tmp
 
 async def error(message, code):
   embed = discord.Embed(color=0xff0000, description=code)
@@ -58,11 +58,37 @@ def checkPerms(message):
     asyncio.create_task(error(message, "You do not have the valid permission: `MANAGE_GUILD`."))
 
 
+invites = {}
+
+@client.event
+async def on_invite_create(invite):
+  #write cache
+  invites[invite.guild.id] = await invite.guild.invites()
+
+@client.event
+async def on_invite_delete(invite):
+  #write cache
+  invites[invite.guild.id] = await invite.guild.invites()
+
 @client.event
 async def on_ready():
   print("\nManageInvites Ready\n")
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="your invites"))
 
+  # Getting all the guilds our bot is in
+  for guild in client.guilds:
+    # Adding each guild's invites to our dict
+    invites[guild.id] = await guild.invites()
+
+def find_invite_by_code(invite_list, code): 
+  # Simply looping through each invite in an
+  # invite list which we will get using guild.invites()
+  for inv in invite_list:
+    # Check if the invite code in this element
+    # of the list is the one we're looking for  
+    if inv.code == code:       
+      # If it is, we return it.      
+      return inv
 
 async def checkRewards(member):
   #check if in db
@@ -78,23 +104,30 @@ async def checkRewards(member):
         await member.guild.get_member(member.id).remove_roles(member.guild.get_role(int(irole)),reason="Invite Reward",atomic=True)
 
 @client.event
-async def on_member_join(member):
-  #wait until getInvites() is done
-  await asyncio.sleep(1.1)
-  global invite
+async def on_member_join(member):  
+  invites_before_join = invites[member.guild.id]
+  invites_after_join = await member.guild.invites()
+  for invite in invites_before_join: 
+    if invite.uses < find_invite_by_code(invites_after_join, invite.code).uses:
+      gotInvite = invite
+      #print(f"Member {member.name} Joined")
+      #print(f"Invite Code: {invite.code}")
+      #print(f"Inviter: {invite.inviter}")
+      invites[member.guild.id] = invites_after_join
+      break
 
-  print(invite.inviter.name)
+  #print(gotInvite.inviter.name)
   #add new member into db
   if str(member.id) not in db[str(member.guild.id)]:
-    db[str(member.guild.id)][str(member.id)] = [str(invite.code),invite.inviter.id,0,0]
+    db[str(member.guild.id)][str(member.id)] = [str(gotInvite.code),gotInvite.inviter.id,0,0]
   #add invite to inviter
   #check if inviter in db
-  if str(invite.inviter.id) not in db[str(member.guild.id)]:
-    db[str(member.guild.id)][str(invite.inviter.id)] = ["",0,0,0]
-  db[str(member.guild.id)][str(invite.inviter.id)][2] += 1
+  if str(gotInvite.inviter.id) not in db[str(member.guild.id)]:
+    db[str(member.guild.id)][str(gotInvite.inviter.id)] = ["",0,0,0]
+  db[str(member.guild.id)][str(gotInvite.inviter.id)][2] += 1
 
-  await checkRewards(member.guild.get_member(invite.inviter.id))
-    
+  await checkRewards(member.guild.get_member(gotInvite.inviter.id))
+
 
 @client.event
 async def on_member_remove(member):
@@ -109,6 +142,8 @@ async def on_member_remove(member):
       #add to inviter leaves
       db[str(member.guild.id)][str(db[str(member.guild.id)][str(member.id)][1])][3] += 1
       await checkRewards(member.guild.get_member(int(db[str(member.guild.id)][str(member.id)][1])))
+  #write cache
+  invites[member.guild.id] = await member.guild.invites()
 
 
 @client.event
@@ -503,7 +538,7 @@ async def on_guild_join(guild):
 
 
 
-client.loop.create_task(getInvites())
+#client.loop.create_task(getInvites())
 
 keep_alive.keep_alive() 
 #keep the bot running after the window closes, use UptimeRobot to ping the website at least every <60min. to prevent the website from going to sleep, turning off the bot
