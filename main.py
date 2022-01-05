@@ -151,6 +151,7 @@ async def on_message(message):
     embed.add_field(name="`"+prefix+ "delirole <role>`", value="Delete an invite role reward", inline=False)
     embed.add_field(name="`"+prefix+ "iroles`", value="Display all invite role rewards", inline=False)
     embed.add_field(name="`"+prefix+ "fetch`", value="Fetch all previous invites", inline=False)
+    embed.add_field(name="`"+prefix+ "invite`", value="Show all your valid invite links.", inline=False)
     embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
     embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
     await message.channel.send(embed=embed)
