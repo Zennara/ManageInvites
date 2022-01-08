@@ -536,6 +536,9 @@ async def on_guild_join(guild):
   db[str(guild.id)] = {"prefix": "i/"}
   db[str(guild.id)]["iroles"] = {}
 
+  #write cache
+  invites[guild.id] = await guild.invites()
+
 
 
 #client.loop.create_task(getInvites())
