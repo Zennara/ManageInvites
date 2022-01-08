@@ -126,6 +126,8 @@ async def on_member_join(member):
     db[str(member.guild.id)][str(gotInvite.inviter.id)] = ["",0,0,0]
   db[str(member.guild.id)][str(gotInvite.inviter.id)][2] += 1
 
+  #write cache
+  invites[invite.guild.id] = await invite.guild.invites()
   await checkRewards(member.guild.get_member(gotInvite.inviter.id))
 
 
