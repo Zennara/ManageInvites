@@ -1,4 +1,4 @@
-#ManageInvites, by Zennara#8377
+  #ManageInvites, by Zennara#8377
 
 #imports
 import os
@@ -159,9 +159,9 @@ async def on_message(message):
 
   messagecontent = message.content.lower()
 
-  if messagecontent == "i/clear":
-    db[str(message.guild.id)] = {"prefix": "i/"}
-    db[str(message.guild.id)]["iroles"] = {}
+  #if messagecontent == "i/clear":
+  #  db[str(message.guild.id)] = {"prefix": "i/"}
+  #  db[str(message.guild.id)]["iroles"] = {}
 
   #get prefix
   prefix = db[str(message.guild.id)]["prefix"]
