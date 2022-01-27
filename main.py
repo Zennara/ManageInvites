@@ -1,4 +1,4 @@
-  #ManageInvites, by Zennara#8377
+#ManageInvites, by Zennara#8377
 
 #imports
 import os
@@ -75,10 +75,15 @@ async def on_ready():
   print("\nManageInvites Ready\n")
   await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="your invites"))
 
+  totalMembers = 0
   # Getting all the guilds our bot is in
   for guild in client.guilds:
     # Adding each guild's invites to our dict
     invites[guild.id] = await guild.invites()
+    print(guild.name)
+    print(guild.member_count)
+    totalMembers += guild.member_count
+  print(totalMembers)
 
 def find_invite_by_code(invite_list, code): 
   # Simply looping through each invite in an
@@ -92,6 +97,8 @@ def find_invite_by_code(invite_list, code):
 
 async def checkRewards(member):
   #check if in db
+  print(member.id)
+  print(member.guild.id)
   if str(member.id) in db[str(member.guild.id)]:
     #add to invites
     for irole in db[str(member.guild.id)]["iroles"]:
@@ -108,13 +115,15 @@ async def on_member_join(member):
   invites_before_join = invites[member.guild.id]
   invites_after_join = await member.guild.invites()
   for invite in invites_before_join: 
-    if invite.uses < find_invite_by_code(invites_after_join, invite.code).uses:
-      gotInvite = invite
-      #print(f"Member {member.name} Joined")
-      #print(f"Invite Code: {invite.code}")
-      #print(f"Inviter: {invite.inviter}")
-      invites[member.guild.id] = invites_after_join
-      break
+    print(invite)
+    try:
+      if invite.uses < find_invite_by_code(invites_after_join, invite.code).uses:
+        gotInvite = invite
+        print(f"Member {member.name} Joined with code {invite.code} from {invite.inviter}")
+        invites[member.guild.id] = invites_after_join
+        break
+    except:
+      print("Error")
 
   #print(gotInvite.inviter.name)
   #add new member into db
@@ -203,7 +212,7 @@ async def on_message(message):
       isInGuild = True
     else:
       dbUser = None
-      #get db user
+      #get db user"
       if str(minusMessageContent[-18:]) in db[str(message.guild.id)]:
         dbUser = db[str(message.guild.id)][str(minusMessageContent[-18:])]
       else:
@@ -451,8 +460,13 @@ async def on_message(message):
                     if rand:
                       embed.add_field(name="᲼",value="\n\n\n:smile: Enjoy free hosting? Consider [donating](https://www.paypal.me/keaganlandfried)")
                     await message.channel.send(embed=embed)
-                    for c in await message.guild.invites():
-                      await checkRewards(message.guild.get_member(c.inviter.id))
+                    tmp = {}
+                    tmp = dict(db[str(message.guild.id)])
+                    for key in tmp.keys():
+                      #all other dataEntries
+                      if key != "iroles" and key != "prefix":
+                        if message.guild.get_member(int(key)):
+                          await checkRewards(message.guild.get_member(int(key)))
                   else:
                     await error(message, "The role " +role.mention+ " is too high in the server hierarchy.\nMy top role is " +message.guild.get_member(int(client.user.id)).top_role.mention+ ".")
                 else:
