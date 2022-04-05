@@ -60,6 +60,22 @@ def checkPerms(message):
 
 invites = {}
 
+def checkRR(check, guild):
+  itemsToRemove = []
+  #loop through roles
+  for item in db[str(guild.id)]["iroles"]:
+    #check if channel that was deleted in db
+    if check == int(item):
+      #add to deletion
+      itemsToRemove.append(str(item))
+  #delete
+  for item in itemsToRemove:
+    del db[str(guild.id)]["iroles"][str(item)]
+
+@client.event
+async def on_guild_role_delete(role):
+  checkRR(role.id, role.guild)
+
 @client.event
 async def on_invite_create(invite):
   #write cache
@@ -186,6 +202,15 @@ async def on_message(message):
     with open("database.json", 'w') as f:
       json.dump(str(data2), f)
 
+  #reset db
+  if messagecontent == prefix+"clear":
+    if message.author.isOwner():
+      db[str(message.guild.id)] = {"prefix": "i/", "iroles": db[str(message.guild.id)]["iroles"]}
+      embed = discord.Embed(color=0xff0000, description="All database entries were reset.")
+      await message.channel.send(embed=embed)
+    else:
+      await error(message, "Only the server owner can use this")
+ 
   #help command
   if messagecontent == prefix + 'help':
     embed = discord.Embed(color=0xFFFFFF, description="These are all the available commands. The prefix is `"+prefix+"`. You can change this at any time with `"+prefix+"prefix <newPrefix>`.\n")
@@ -515,6 +540,11 @@ async def on_message(message):
     #get all RR messages
     embed = discord.Embed(color=0x00FF00, description="**Invite Role-Rewards**")
     embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+    for irole in db[str(message.guild.id)]["iroles"]:
+      try:
+        message.guild.get_role(int(irole))
+      except:
+        checkRR(int(irole), message.guild)
     for irole in db[str(message.guild.id)]["iroles"]:
       if count == 25:
         count = 0
